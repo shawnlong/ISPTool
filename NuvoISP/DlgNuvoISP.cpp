@@ -73,7 +73,6 @@ CNuvoISPDlg::CNuvoISPDlg(UINT Template,
 #endif
     };
     memcpy(&m_CtrlID, buddy, sizeof(m_CtrlID));
-    m_bShowSPI = -1; // not initialized
 }
 
 CNuvoISPDlg::~CNuvoISPDlg()
@@ -199,7 +198,6 @@ BOOL CNuvoISPDlg::OnInitDialog()
     SetDlgItemText(IDC_EDIT_FLASH_BASE_ADDRESS, _T("100000"));
     Set_ThreadAction(&CISPProc::Thread_Idle);
     RegisterNotification();
-    ShowSPIOptions(FALSE);
     // ShowSPIOptions(TRUE);
     return TRUE;	// return TRUE  unless you set the focus to a control
 }
@@ -717,68 +715,9 @@ void CNuvoISPDlg::ShowChipInfo_OffLine(void)
     Invalidate(1);
 }
 
-// NUC505: No CONFIG, only SPI Flash, Don't need to query flash size
-void CNuvoISPDlg::ShowChipInfo_NUC505(void)
-{
-    SetDlgItemText(IDC_EDIT_PARTNO, _T("NUC505"));
-    ChangeBtnText(0,  _T("Code"));
-    ChangeBtnText(1,  _T("Data"));
-    SetDlgItemText(IDC_STATIC_CONFIG_VALUE_0, _T("NA"));
-    SetDlgItemText(IDC_STATIC_CONFIG_VALUE_1, _T("NA"));
-    m_bProgram_Config = 0;
-    m_bErase = 0;
-    EnableDlgItem(IDC_CHECK_CONFIG, 0);
-    EnableDlgItem(IDC_CHECK_ERASE, 0);
-    EnableDlgItem(IDC_BUTTON_CONFIG, 0);
-    ShowDlgItem(IDC_STATIC_APOFFSET, 1);
-    ShowDlgItem(IDC_EDIT_APROM_BASE_ADDRESS, 1);
-    EnableDlgItem(IDC_EDIT_APROM_BASE_ADDRESS, 0);
-    ShowDlgItem(IDC_STATIC_FLASH_BASE_ADDRESS, 1);
-    ShowDlgItem(IDC_EDIT_FLASH_BASE_ADDRESS, 1);
-    CString info;
-    info.Format(_T("RAM:128K, SPI Flash:2M\nFW Ver: 0x%X"), int(m_ucFW_VER));
-    SetDlgItemText(IDC_STATIC_PARTNO, info);
-    UpdateAddrOffset();
-    Invalidate(1);
-}
-
-void CNuvoISPDlg::ShowChipInfo_M2351(void)
-{
-    SetDlgItemText(IDC_STATIC_CONFIG_0, _T("Config 0-3:"));
-    ShowDlgItem(IDC_STATIC_CONFIG_VALUE_2, 1);
-    ShowDlgItem(IDC_STATIC_CONFIG_VALUE_3, 1);
-    // ChangeBtnText(1, _T("APROM_NS"));
-    m_uAPROM_Size = gsChipCfgInfo.uProgramMemorySize;
-    ShowDlgItem(IDC_STATIC_APOFFSET, 1);
-    ShowDlgItem(IDC_EDIT_APROM_BASE_ADDRESS, 1);
-    EnableDlgItem(IDC_EDIT_APROM_BASE_ADDRESS, 1);
-    m_uNVM_Size = 0;
-    m_bProgram_NVM = 0;
-    EnableDlgItem(IDC_BUTTON_NVM, (m_uNVM_Size != 0));
-    EnableDlgItem(IDC_CHECK_NVM, (m_uNVM_Size != 0));
-    std::ostringstream os;
-    os << "APROM: " << size_str(gsChipCfgInfo.uProgramMemorySize);
-    std::string cstr = os.str();
-    std::wstring wcstr(cstr.begin(), cstr.end());
-    CString str = wcstr.c_str();
-    CString tips;
-    tips.Format(_T("Information of target chip,\n\n%s"), str);
-    CString info;
-    info.Format(_T("%s\nFW Ver: 0x%X"), wcstr.c_str(), int(m_ucFW_VER));
-    SetDlgItemText(IDC_STATIC_PARTNO, info);
-    Invalidate(1);
-}
-
 void CNuvoISPDlg::ShowChipInfo_OnLine()
 {
-    ShowSPIOptions(m_bSupport_SPI);
     bool bSizeValid = UpdateSizeInfo(m_ulDeviceID, m_CONFIG[0], m_CONFIG[1]);
-
-    // There is no specific part number for NUC505
-    if (0x00550505 == m_ulDeviceID) {
-        ShowChipInfo_NUC505();
-        return;
-    }
 
     // Update Part Number & CONFIG0 ~ CONFIG3 for all series
     CString strTmp = _T("");
@@ -797,12 +736,6 @@ void CNuvoISPDlg::ShowChipInfo_OnLine()
     if (m_SelInterface.GetCurSel() == 5) { // CAN interface
         m_bErase = 0;
         EnableDlgItem(IDC_CHECK_ERASE, 0);
-    }
-
-    if ((gsChipCfgInfo.uSeriesCode == NUC_CHIP_TYPE_M2351)
-            || (gsChipCfgInfo.uSeriesCode == NUC_CHIP_TYPE_M2354)) {
-        ShowChipInfo_M2351();
-        return;
     }
 
     if (gsChipCfgInfo.uSeriesCode == IDD_DIALOG_CONFIGURATION_M480) {
@@ -975,173 +908,3 @@ void CNuvoISPDlg::OnKillfocusEditAPRomOffset()
 }
 
 
-void CNuvoISPDlg::ShowSPIOptions(BOOL bShow)
-{
-    if (m_bShowSPI == bShow) {
-        return;
-    } else {
-        m_bShowSPI = bShow;
-    }
-
-    CWnd *pWnd = NULL;
-    CRect rect1, rect2;
-    int offset;
-    // Group - Load File
-    ShowDlgItem(IDC_BUTTON_SPI, bShow);
-    ShowDlgItem(IDC_STATIC_FILENAME_SPI, bShow);
-    ShowDlgItem(IDC_EDIT_FILEPATH_SPI, bShow);
-    ShowDlgItem(IDC_STATIC_FILEINFO_SPI, bShow);
-    pWnd = GetDlgItem(IDC_GROUP_FLASH_FILE);
-    pWnd->GetWindowRect(&rect1);
-    ScreenToClient(&rect1);
-
-    if (bShow) {
-        GetDlgItem(IDC_STATIC_FILEINFO_SPI)->GetWindowRect(&rect2);
-    } else {
-        GetDlgItem(IDC_STATIC_FILEINFO_NVM)->GetWindowRect(&rect2);
-    }
-
-    ScreenToClient(&rect2);
-    rect1.bottom = rect2.bottom + 10;
-    pWnd->MoveWindow(rect1.left,
-                     rect1.top,
-                     rect1.Width(),
-                     rect1.Height());
-    // Group - Config Bits
-    UINT32 nIds_CB[] = {
-        IDC_GROUP_CONFIG,
-        IDC_BUTTON_CONFIG,
-        IDC_STATIC_CONFIG_0,
-        IDC_STATIC_CONFIG_VALUE_0,
-        IDC_STATIC_CONFIG_VALUE_1,
-        IDC_STATIC_CONFIG_VALUE_2,
-        IDC_STATIC_CONFIG_VALUE_3,
-    };
-    GetDlgItem(IDC_GROUP_FLASH_FILE)->GetWindowRect(&rect1);
-    ScreenToClient(&rect1);
-    GetDlgItem(IDC_GROUP_CONFIG)->GetWindowRect(&rect2);
-    ScreenToClient(&rect2);
-    offset = rect2.top - rect1.top - rect1.Height() - 5;
-
-    for (int i = 0; i < 7; i++) {
-        CRect rect;
-        CWnd *pWnd = GetDlgItem(nIds_CB[i]);
-        pWnd->GetWindowRect(&rect);
-        ScreenToClient(&rect);
-        pWnd->MoveWindow(rect.left,
-                         rect.top - offset,
-                         rect.Width(),
-                         rect.Height());
-    }
-
-    // Group - File Data
-    if (bShow) {
-        if (m_TabData.GetItemCount() != NUM_VIEW) {
-            CString strTab;
-            GetDlgItemText(m_CtrlID[2].btn, strTab);
-            m_TabData.InsertItem(2, strTab);
-        }
-    } else {
-        if (m_TabData.GetItemCount() == NUM_VIEW) {
-            m_TabData.DeleteItem(2);
-        }
-
-        pViewer[2]->ShowWindow(SW_HIDE);
-    }
-
-    UINT32 nIds_FD[] = {
-        IDC_GROUP_FILE_DATA,
-        IDC_TAB_DATA,
-    };
-    GetDlgItem(IDC_GROUP_CONFIG)->GetWindowRect(&rect1);
-    ScreenToClient(&rect1);
-    GetDlgItem(IDC_GROUP_FILE_DATA)->GetWindowRect(&rect2);
-    ScreenToClient(&rect2);
-    offset = rect2.top - rect1.top - rect1.Height() - 5;
-
-    for (int i = 0; i < 2; i++) {
-        CRect rect;
-        CWnd *pWnd = GetDlgItem(nIds_FD[i]);
-        pWnd->GetWindowRect(&rect);
-        ScreenToClient(&rect);
-        pWnd->MoveWindow(rect.left,
-                         rect.top - offset,
-                         rect.Width(),
-                         rect.Height());
-    }
-
-    pViewer[2]->ShowWindow(bShow);
-    // Group - Programming Options
-    ShowDlgItem(IDC_CHECK_SPI, bShow);
-    ShowDlgItem(IDC_CHECK_ERASE_SPI, bShow);
-    UINT32 nIds_PO[] = {
-        IDC_GROUP_PROGRAM,
-        IDC_CHECK_APROM,
-        IDC_CHECK_NVM,
-        IDC_CHECK_SPI,
-        IDC_CHECK_CONFIG,
-        IDC_CHECK_RUN_APROM,
-        IDC_CHECK_ERASE,
-        IDC_CHECK_ERASE_SPI,
-        IDC_BUTTON_START,
-    };
-    GetDlgItem(IDC_GROUP_FILE_DATA)->GetWindowRect(&rect1);
-    ScreenToClient(&rect1);
-    GetDlgItem(IDC_GROUP_PROGRAM)->GetWindowRect(&rect2);
-    ScreenToClient(&rect2);
-    offset = rect2.top - rect1.top - rect1.Height() - 5;
-
-    for (int i = 0; i < 9; i++) {
-        CRect rect;
-        CWnd *pWnd = GetDlgItem(nIds_PO[i]);
-        pWnd->GetWindowRect(&rect);
-        ScreenToClient(&rect);
-        pWnd->MoveWindow(rect.left,
-                         rect.top - offset,
-                         rect.Width(),
-                         rect.Height());
-    }
-
-    if (bShow) {
-        SetDlgItemText(IDC_CHECK_ERASE, _T("Erase All (Exclude SPI)"));
-        GetDlgItem(IDC_CHECK_SPI)->GetWindowRect(&rect2);
-    } else {
-        SetDlgItemText(IDC_CHECK_ERASE, _T("Erase All"));
-        GetDlgItem(IDC_CHECK_APROM)->GetWindowRect(&rect2);
-    }
-
-    ScreenToClient(&rect2);
-    pWnd = GetDlgItem(IDC_GROUP_PROGRAM);
-    pWnd->GetWindowRect(&rect1);
-    ScreenToClient(&rect1);
-    rect1.bottom = rect2.bottom + 10;
-    pWnd->MoveWindow(rect1.left,
-                     rect1.top,
-                     rect1.Width(),
-                     rect1.Height());
-    // Progress Bar and Status
-    UINT32 nIds_PB[] = {
-        IDC_PROGRESS,
-        IDC_STATIC_STATUS,
-    };
-
-    for (int i = 0; i < 2; i++) {
-        CRect rect;
-        CWnd *pWnd = GetDlgItem(nIds_PB[i]);
-        pWnd->GetWindowRect(&rect);
-        ScreenToClient(&rect);
-        pWnd->MoveWindow(rect.left,
-                         rect1.bottom + 5,
-                         rect.Width(),
-                         rect.Height());
-    }
-
-    // Main Window
-    GetWindowRect(&m_rect);
-    GetDlgItem(IDC_PROGRESS)->GetWindowRect(&rect2);
-    m_rect.bottom = rect2.bottom + 10;
-    MoveWindow(m_rect.left,
-               m_rect.top,
-               m_rect.Width(),
-               m_rect.Height());
-}

@@ -20,14 +20,7 @@ class CNuvoISPDlg: public CDialogMain, public CISPProc
 {
 // Construction
 public:
-#if (SUPPORT_SPIFLASH)
-    enum { IDD = IDD_DIALOG_NUVOISP_WITH_SPI};
-#else
-    enum { IDD = IDD_DIALOG_NUVOISP};
-#endif
-
-    BOOL m_bShowSPI;
-    void ShowSPIOptions(BOOL bShow);
+    enum { IDD = IDD_DIALOG_NUVOISP_WITH_LDROM};
 
     CNuvoISPDlg(UINT Template = CNuvoISPDlg::IDD, CWnd *pParent = NULL);	// standard constructor
     virtual ~CNuvoISPDlg();
@@ -73,8 +66,6 @@ protected:
 
     void ShowChipInfo_OffLine(void);
     void ShowChipInfo_OnLine(void);
-    void ShowChipInfo_NUC505(void);
-    void ShowChipInfo_M2351(void);
     void ChangeBtnText(int nBtn, LPTSTR pszText);
 
 public:

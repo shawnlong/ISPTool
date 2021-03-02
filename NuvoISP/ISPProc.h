@@ -102,8 +102,8 @@ public:
     BOOL	m_bProgram_Config;
     BOOL	m_bErase;
     BOOL	m_bRunAPROM;
-#if (SUPPORT_SPIFLASH)
     BOOL	m_bSupport_SPI;
+#if (SUPPORT_SPIFLASH)
     BOOL	m_bProgram_SPI;
     BOOL	m_bErase_SPI;
 #endif

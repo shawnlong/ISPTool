@@ -25,6 +25,7 @@
 #define IDC_LINK_GITLAB                 128
 #define IDD_DIALOG_NUVOISP_WITH_SPI     129
 #define IDD_DIALOG_CONFIGURATION_NANO100 130
+#define IDD_DIALOG_NUVOISP_WITH_SPI2    130
 #define IDD_DIALOG_CONFIGURATION_MINI51 132
 #define IDI_ICON_NULINK                 134
 #define IDD_DIALOG_CONFIGURATION_NUC200 136
@@ -60,6 +61,7 @@
 #define IDC_STATIC_CONNECT              1021
 #define IDC_GROUP_PARTNO                1022
 #define IDC_BUTTON_EXT                  1022
+#define IDC_CHECK_APROM2                1022
 #define IDC_STATIC_PARTNO               1023
 #define IDC_GROUP_FLASH_FILE            1024
 #define IDC_STATIC_FILENAME_0           1025
@@ -333,6 +335,7 @@
 #define IDD_DIALOG_CHIP_SETTING_CFG_M258 5148
 #define IDD_DIALOG_CHIP_SETTING_NUMICRO 5150
 #define IDD_DIALOG_CHIP_SETTING_CFG_M0A21 5151
+#define IDD_DIALOG_NUVOISP_WITH_LDROM   5152
 #define IDC_STATIC_MYMESSAGE            5535
 #define IDC_STATIC_TOGET                5536
 #define IDC_BUTTON_OK                   5537
@@ -353,7 +356,7 @@
 #define ID_OPTION_PROGRAMCONFIGURATION  32817
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        567
