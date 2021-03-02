@@ -71,6 +71,9 @@ protected:
 public:
     afx_msg HBRUSH OnCtlColor(CDC *pDC, CWnd *pWnd, UINT nCtlColor);
     void UpdateAddrOffset();
+#if (SUPPORT_LDROM)
+    afx_msg void OnButtonCheckReset();
+#endif
 
 private:
     void RegisterNotification();

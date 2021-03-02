@@ -478,12 +478,20 @@ void CISPProc::Thread_ProgramFlash()
 #endif
 
         if (m_bRunAPROM) {
+#if (SUPPORT_LDROM)
+            if (m_bRunAPROM == 1) {
+                m_ISPLdDev.RunAPROM();
+            } else {
+                m_ISPLdDev.RunLDROM();
+            }
+#else
             m_ISPLdDev.RunAPROM();
+#endif
             m_eProcSts = EPS_OK;
             time_t end = time(NULL);
             m_uProgTime = unsigned int(end - start);
             CString str;
-            str.Format(_T("Programming flash, OK! Run to APROM (%d secs)"), m_uProgTime);
+            str.Format(_T("Programming flash, OK! Run the application (%d secs)"), m_uProgTime);
 
             if (MainHWND != NULL) {
                 MessageBox(*MainHWND, str, _T(""), MB_ICONINFORMATION);

@@ -127,6 +127,7 @@ BEGIN_MESSAGE_MAP(CNuvoISPDlg, CDialog)
     ON_BN_CLICKED(IDC_BUTTON_SPI, OnButtonLoadFile)
 #elif (SUPPORT_LDROM)
     ON_BN_CLICKED(IDC_BUTTON_LDROM, OnButtonLoadFile)
+    ON_BN_CLICKED(IDC_CHECK_RUN_APROM, OnButtonCheckReset)
 #endif
     ON_BN_CLICKED(IDC_BUTTON_START, OnButtonStart)
     ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_DATA, OnSelchangeTabData)
@@ -922,4 +923,17 @@ void CNuvoISPDlg::OnKillfocusEditAPRomOffset()
     TRACE(_T("OnKillfocusEditAPRomOffset\n"));
 }
 
+#if (SUPPORT_LDROM)
+void CNuvoISPDlg::OnButtonCheckReset()
+{
+    UpdateData(TRUE);
 
+    if (m_bRunAPROM == 2) {
+        SetDlgItemText(IDC_CHECK_RUN_APROM, _T("Reset and Run (LDROM)"));
+    } else if (m_bRunAPROM == 1) {
+        SetDlgItemText(IDC_CHECK_RUN_APROM, _T("Reset and Run (APROM)"));
+    } else {
+        SetDlgItemText(IDC_CHECK_RUN_APROM, _T("Reset and Run (APROM or LDROM)"));
+    }
+}
+#endif
