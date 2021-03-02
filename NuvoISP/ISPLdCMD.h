@@ -3,6 +3,7 @@
 #pragma once
 
 #define SUPPORT_SPIFLASH (0)
+#define SUPPORT_LDROM (1)
 
 #include "CScopedMutex.hpp"
 #include "Interface\CHidIO2.h"
@@ -72,8 +73,11 @@ public:
         CMD_UPDATE_DATAFLASH = 0x000000C3,
         CMD_RESEND_PACKET   = 0x000000FF,
 #if (SUPPORT_SPIFLASH)
-        CMD_ERASE_SPIFLASH = 0x000000D0,
+        CMD_ERASE_SPIFLASH  = 0x000000D0,
         CMD_UPDATE_SPIFLASH = 0x000000D1,
+#endif
+#if (SUPPORT_LDROM)
+        CMD_UPDATE_LDROM    = 0x000000D2,
 #endif
     };
 
@@ -96,6 +100,14 @@ public:
                    unsigned long cur_addr,
                    const char *buffer,
                    unsigned long *update_len);
+
+#if (SUPPORT_LDROM)
+    void UpdateLDROM(unsigned long start_addr,
+        unsigned long total_len,
+        unsigned long cur_addr,
+        const char* buffer,
+        unsigned long* update_len);
+#endif
 
     BOOL EraseAll();
 

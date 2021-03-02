@@ -12,7 +12,7 @@
 
 #include "fileinfo.h"
 
-#if (SUPPORT_SPIFLASH)
+#if (SUPPORT_SPIFLASH | SUPPORT_LDROM)
 #define NUM_VIEW 3
 #else
 #define NUM_VIEW 2
@@ -42,6 +42,7 @@ enum EProcSts {
     EPS_ERR_SIZE = 6,
     EPS_PROG_DONE = 7,
     EPS_ERR_SPI = 9,
+    EPS_ERR_LDROM = 10,
 };	// m_eProcSts
 
 class CISPProc
@@ -106,6 +107,8 @@ public:
 #if (SUPPORT_SPIFLASH)
     BOOL	m_bProgram_SPI;
     BOOL	m_bErase_SPI;
+#elif (SUPPORT_LDROM)
+    BOOL	m_bProgram_LDROM;
 #endif
     // ISPLdCMD2 supports different protocol for CAN interface
     ISPLdCMD2	m_ISPLdDev;

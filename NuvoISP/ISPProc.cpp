@@ -364,6 +364,55 @@ void CISPProc::Thread_ProgramFlash()
             }
         }
 
+#if (SUPPORT_LDROM)
+        if (m_bProgram_LDROM) {
+            uAddr = 0;
+            uSize = m_sFileInfo[2].st_size;
+            pBuffer = vector_ptr(m_sFileInfo[2].vbuf);
+
+
+            if (MainHWND != NULL) {
+                PostMessage(*MainHWND, MSG_USER_EVENT, MSG_UPDATE_WRITE_STATUS, 0);
+            }
+
+            m_ISPLdDev.SyncPackno();
+
+            for (unsigned long i = 0; i < uSize;) {
+                if (m_fnThreadProcStatus != &CISPProc::Thread_ProgramFlash) {
+                    break;
+                }
+
+                unsigned long uLen;
+                unsigned int uRetry = 10;
+
+                while (uRetry) {
+                    m_ISPLdDev.UpdateLDROM(uAddr, uSize, uAddr + i,
+                        (const char*)(pBuffer + i),
+                        &uLen);
+
+                    if (m_ISPLdDev.bResendFlag) {
+                        uRetry--;
+
+                        if (uRetry == 0 || i == 0 || !m_ISPLdDev.CMD_Resend()) {
+                            m_eProcSts = EPS_ERR_LDROM;
+                            Set_ThreadAction(&CISPProc::Thread_CheckDisconnect);
+                            return;
+                        }
+                    }
+                    else {
+                        break;
+                    }
+                }
+
+                i += uLen;
+
+                if (MainHWND != NULL) {
+                    PostMessage(*MainHWND, MSG_USER_EVENT, MSG_UPDATE_WRITE_STATUS, (i * 100) / uSize);
+                }
+            }
+        }
+#endif
+
 #if (SUPPORT_SPIFLASH)
 
         if (m_bSupport_SPI && (m_bProgram_SPI || m_bErase_SPI)) {
