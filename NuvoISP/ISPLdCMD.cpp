@@ -537,15 +537,15 @@ BOOL ISPLdCMD::Cmd_UPDATE_SPIFLASH(unsigned long start_addr,
 
 #if (SUPPORT_LDROM)
 void ISPLdCMD::UpdateLDROM(unsigned long start_addr,
-    unsigned long total_len,
-    unsigned long cur_addr,
-    const char* buffer,
-    unsigned long* update_len)
+                           unsigned long total_len,
+                           unsigned long cur_addr,
+                           const char *buffer,
+                           unsigned long *update_len)
 {
     unsigned long write_len = total_len - (cur_addr - start_addr);
     char acBuffer[
-        HID_MAX_PACKET_SIZE_EP
-            - 8 /* cmd, index */];
+     HID_MAX_PACKET_SIZE_EP
+     - 8 /* cmd, index */];
 
     if (start_addr == cur_addr) {
         if (write_len > sizeof(acBuffer) - 8/*start_addr, total_len*/) {
@@ -562,8 +562,7 @@ void ISPLdCMD::UpdateLDROM(unsigned long start_addr,
             USBCMD_TIMEOUT_LONG);
         /* First block need erase the chip, need long timeout */
         ReadFile(NULL, 0, USBCMD_TIMEOUT_LONG, TRUE);
-    }
-    else {
+    } else {
         if (write_len > sizeof(acBuffer)) {
             write_len = sizeof(acBuffer);
         }

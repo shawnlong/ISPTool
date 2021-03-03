@@ -492,10 +492,8 @@ void CNuvoISPDlg::OnButtonStart()
     // TODO: Add your control notification handler code here
     UpdateData(TRUE);
     /* Try to reload file if necessary */
-
     BOOL _bProgram_ISP = (m_bProgram_APROM | m_bProgram_NVM | m_bProgram_Config | m_bErase | m_bRunAPROM);
     BOOL _bProgram_ISP_EXT = FALSE;
-
 #if (SUPPORT_SPIFLASH)
     _bProgram_ISP_EXT = (m_bSupport_SPI & (m_bProgram_SPI | m_bErase_SPI));
 #elif (SUPPORT_LDROM)
@@ -734,7 +732,6 @@ void CNuvoISPDlg::ShowChipInfo_OffLine(void)
 void CNuvoISPDlg::ShowChipInfo_OnLine()
 {
     bool bSizeValid = UpdateSizeInfo(m_ulDeviceID, m_CONFIG[0], m_CONFIG[1]);
-
     // Update Part Number & CONFIG0 ~ CONFIG3 for all series
     CString strTmp = _T("");
     strTmp = gsChipCfgInfo.szPartNumber;

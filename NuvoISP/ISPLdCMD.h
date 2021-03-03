@@ -103,10 +103,10 @@ public:
 
 #if (SUPPORT_LDROM)
     void UpdateLDROM(unsigned long start_addr,
-        unsigned long total_len,
-        unsigned long cur_addr,
-        const char* buffer,
-        unsigned long* update_len);
+                     unsigned long total_len,
+                     unsigned long cur_addr,
+                     const char *buffer,
+                     unsigned long *update_len);
 #endif
 
     BOOL EraseAll();

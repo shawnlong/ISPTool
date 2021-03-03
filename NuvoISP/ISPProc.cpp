@@ -365,11 +365,11 @@ void CISPProc::Thread_ProgramFlash()
         }
 
 #if (SUPPORT_LDROM)
+
         if (m_bProgram_LDROM) {
             uAddr = 0;
             uSize = m_sFileInfo[2].st_size;
             pBuffer = vector_ptr(m_sFileInfo[2].vbuf);
-
 
             if (MainHWND != NULL) {
                 PostMessage(*MainHWND, MSG_USER_EVENT, MSG_UPDATE_WRITE_STATUS, 0);
@@ -387,8 +387,8 @@ void CISPProc::Thread_ProgramFlash()
 
                 while (uRetry) {
                     m_ISPLdDev.UpdateLDROM(uAddr, uSize, uAddr + i,
-                        (const char*)(pBuffer + i),
-                        &uLen);
+                                           (const char *)(pBuffer + i),
+                                           &uLen);
 
                     if (m_ISPLdDev.bResendFlag) {
                         uRetry--;
@@ -398,8 +398,7 @@ void CISPProc::Thread_ProgramFlash()
                             Set_ThreadAction(&CISPProc::Thread_CheckDisconnect);
                             return;
                         }
-                    }
-                    else {
+                    } else {
                         break;
                     }
                 }
@@ -411,8 +410,8 @@ void CISPProc::Thread_ProgramFlash()
                 }
             }
         }
-#endif
 
+#endif
 #if (SUPPORT_SPIFLASH)
 
         if (m_bSupport_SPI && (m_bProgram_SPI || m_bErase_SPI)) {
@@ -479,11 +478,13 @@ void CISPProc::Thread_ProgramFlash()
 
         if (m_bRunAPROM) {
 #if (SUPPORT_LDROM)
+
             if (m_bRunAPROM == 1) {
                 m_ISPLdDev.RunAPROM();
             } else {
                 m_ISPLdDev.RunLDROM();
             }
+
 #else
             m_ISPLdDev.RunAPROM();
 #endif
