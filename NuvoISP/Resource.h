@@ -12,6 +12,7 @@
 #define IDD_DIALOG_CONFIGURATION_NUC100 107
 #define IDD_DIALOG_HEX                  108
 #define IDC_BUTTON_IMPORT               109
+#define IDD_DIALOG_CHIPSELECT           112
 #define IDB_BITMAP_CHIPS                113
 #define IDD_DIALOG_CONFIGURATION_M051   119
 #define IDD_DIALOG_CONFIGURATION_M051BN 120
@@ -25,7 +26,6 @@
 #define IDC_LINK_GITLAB                 128
 #define IDD_DIALOG_NUVOISP_WITH_SPI     129
 #define IDD_DIALOG_CONFIGURATION_NANO100 130
-#define IDD_DIALOG_NUVOISP_WITH_SPI2    130
 #define IDD_DIALOG_CONFIGURATION_MINI51 132
 #define IDI_ICON_NULINK                 134
 #define IDD_DIALOG_CONFIGURATION_NUC200 136
@@ -61,7 +61,6 @@
 #define IDC_STATIC_CONNECT              1021
 #define IDC_GROUP_PARTNO                1022
 #define IDC_BUTTON_EXT                  1022
-#define IDC_CHECK_APROM2                1022
 #define IDC_STATIC_PARTNO               1023
 #define IDC_GROUP_FLASH_FILE            1024
 #define IDC_STATIC_FILENAME_0           1025
