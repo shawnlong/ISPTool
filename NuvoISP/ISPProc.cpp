@@ -35,6 +35,13 @@ CISPProc::CISPProc(HWND *pWnd)
     , m_bProgram_NVM(0)
     , m_bProgram_Config(0)
     , m_bErase(0)
+    , m_bRunAPROM(0)
+      // SPI option is for M487KMCAN only
+    , m_bSupport_SPI(0)
+    , m_bProgram_SPI(0)
+    , m_bErase_SPI(0)
+      // LDROM option is for M480HD MKROM only
+    , m_bProgram_LDROM(0)
 {
     MainHWND = pWnd;
     m_hThreadMutex = ::CreateMutex(NULL, FALSE, NULL);

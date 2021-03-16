@@ -100,16 +100,16 @@ public:
     BOOL	m_bErase;
     BOOL	m_bRunAPROM;
 
+    // For M487KMCAN only
     BOOL	m_bSupport_SPI; // CMD_Connect
     BOOL	m_bProgram_SPI;
     BOOL	m_bErase_SPI;
 
+    // For M480HD MKROM only
     BOOL	m_bProgram_LDROM;
 
-
-
     // ISPLdCMD2 supports different protocol for CAN interface
-    ISPLdCMD2	m_ISPLdDev;
+    ISPLdCMD	m_ISPLdDev;
     void SetInterface(unsigned int it, CString str)
     {
         m_ISPLdDev.SetInterface(it, str);
