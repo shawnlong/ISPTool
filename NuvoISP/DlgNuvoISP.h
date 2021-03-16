@@ -24,7 +24,7 @@ public:
 
 
     BOOL m_bShowSPI;
-    void ShowSPIOptions(BOOL bShow);
+    virtual void ShowSPIOptions(BOOL bShow);
 
     CNuvoISPDlg(UINT Template = CNuvoISPDlg::IDD, CWnd *pParent = NULL);	// standard constructor
     virtual ~CNuvoISPDlg();
@@ -83,6 +83,21 @@ private:
     void UnregisterNotification();
     HDEVNOTIFY m_hNotifyDevNode;
 };
+
+class CNuvoISPDlg_MKROM : public CNuvoISPDlg
+{
+public:
+    enum { IDD = IDD_DIALOG_NUVOISP_WITH_LDROM };
+    CNuvoISPDlg_MKROM(UINT Template = CNuvoISPDlg_MKROM::IDD, CWnd *pParent = NULL);	// standard constructor
+    virtual ~CNuvoISPDlg_MKROM();
+    void ShowSPIOptions(BOOL bShow) {};
+    afx_msg void OnButtonCheckReset();
+
+protected:
+    virtual BOOL OnInitDialog();
+    DECLARE_MESSAGE_MAP()
+};
+
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

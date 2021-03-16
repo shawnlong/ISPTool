@@ -165,7 +165,7 @@ BOOL CISPToolApp::InitInstance()
     }
 _UI_MODE:
     SetRegistryKey(_T("NuvotonISP"));
-    CNuvoISPDlg MainDlg;
+    CNuvoISPDlg_MKROM MainDlg;
     MainDlg.DoModal();
     return FALSE;
 }

@@ -99,10 +99,10 @@ void CNuvoISPDlg::DoDataExchange(CDataExchange *pDX)
     DDX_Text(pDX, IDC_STATIC_CONNECT, m_sConnect);
     DDX_Check(pDX, IDC_CHECK_APROM, m_bProgram_APROM);
     DDX_Check(pDX, IDC_CHECK_NVM, m_bProgram_NVM);
-#if (SUPPORT_SPIFLASH)
-    DDX_Check(pDX, IDC_CHECK_SPI, m_bProgram_SPI);
-    DDX_Check(pDX, IDC_CHECK_ERASE_SPI, m_bErase_SPI);
-#endif
+//#if (SUPPORT_SPIFLASH)
+//    DDX_Check(pDX, IDC_CHECK_SPI, m_bProgram_SPI);
+//    DDX_Check(pDX, IDC_CHECK_ERASE_SPI, m_bErase_SPI);
+//#endif
     DDX_Check(pDX, IDC_CHECK_CONFIG, m_bProgram_Config);
     DDX_Check(pDX, IDC_CHECK_ERASE, m_bErase);
     DDX_Check(pDX, IDC_CHECK_RUN_APROM, m_bRunAPROM);
@@ -435,6 +435,10 @@ LRESULT CNuvoISPDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
                             AfxMessageBox(_T("Update SPI Flash failed"));
                             break;
 
+                        case EPS_ERR_LDROM:
+                            AfxMessageBox(_T("Update LDROM failed"));
+                            break;
+
                         case EPS_ERR_SIZE:
                             AfxMessageBox(_T("File Size > Flash Size"));
                             break;
@@ -482,26 +486,20 @@ void CNuvoISPDlg::OnButtonStart()
     // TODO: Add your control notification handler code here
     UpdateData(TRUE);
     /* Try to reload file if necessary */
-#if (SUPPORT_SPIFLASH)
-
-    if (m_bProgram_APROM || m_bProgram_NVM || m_bProgram_Config || m_bErase || m_bRunAPROM) {
-        // Check Standart ISP Options
-    } else if (m_bSupport_SPI && (m_bProgram_SPI || m_bErase_SPI)) {
-        // Check Extend ISP Options for SPI Flash
-    } else {
-        MessageBox(_T("You did not select any operation."), NULL, MB_ICONSTOP);
-        return;
-    }
-
-#else
+    // M487KMCAN
+    m_bProgram_SPI = IsDlgButtonChecked(IDC_CHECK_SPI);
+    m_bErase_SPI = IsDlgButtonChecked(IDC_CHECK_ERASE_SPI);
+    // M480HD
+    m_bProgram_LDROM = IsDlgButtonChecked(IDC_CHECK_LDROM);
+    BOOL _bProgram_ISP = (m_bProgram_APROM || m_bProgram_NVM || m_bProgram_Config || m_bErase || m_bRunAPROM);
+    BOOL _bProgram_ISP_EXT = (m_bSupport_SPI && (m_bProgram_SPI || m_bErase_SPI)) || m_bProgram_LDROM;
 
     /* Check program operation */
-    if (!(m_bProgram_APROM || m_bProgram_NVM || m_bProgram_Config || m_bErase || m_bRunAPROM)) {
+    if (!(_bProgram_ISP || _bProgram_ISP_EXT)) {
         MessageBox(_T("You did not select any operation."), NULL, MB_ICONSTOP);
         return;
     }
 
-#endif
     /* WYLIWYP : What You Lock Is What You Program*/
     /* Lock ALL */
     EnableProgramOption(FALSE);
@@ -525,15 +523,20 @@ void CNuvoISPDlg::OnButtonStart()
             }
         }
 
-#if (SUPPORT_SPIFLASH)
-
+        // LDROM or SPI Flash
         if (strErr.IsEmpty() && m_bProgram_SPI && m_bSupport_SPI) {
             if (m_sFileInfo[2].st_size == 0) {
                 strErr = _T("Can not load SPI flash file for programming!");
             }
         }
 
-#endif
+        // LDROM or SPI Flash
+        if (strErr.IsEmpty() && m_bProgram_LDROM) {
+            if (m_sFileInfo[2].st_size == 0) {
+                strErr = _T("Can not load LDROM file for programming!");
+            }
+        }
+
         // In case user press "Enter" after typing offset, need to call OnKillfocusEditAPRomOffset manually
         OnKillfocusEditAPRomOffset();
         UpdateAddrOffset();
@@ -645,11 +648,13 @@ void CNuvoISPDlg::EnableProgramOption(BOOL bEnable)
     EnableDlgItem(IDC_CHECK_ERASE, bEnable);
     EnableDlgItem(IDC_CHECK_RUN_APROM, bEnable);
     EnableDlgItem(IDC_BUTTON_START, bEnable);
-#if (SUPPORT_SPIFLASH)
+    // SPI Option
     EnableDlgItem(IDC_BUTTON_SPI, bEnable);
     EnableDlgItem(IDC_CHECK_SPI, bEnable);
     EnableDlgItem(IDC_CHECK_ERASE_SPI, bEnable);
-#endif
+    // LDROM Option
+    EnableDlgItem(IDC_BUTTON_LDROM, bEnable);
+    EnableDlgItem(IDC_CHECK_LDROM, bEnable);
 }
 
 void CNuvoISPDlg::OnPaint()
@@ -1142,4 +1147,46 @@ void CNuvoISPDlg::ShowSPIOptions(BOOL bShow)
                m_rect.top,
                m_rect.Width(),
                m_rect.Height());
+}
+
+BEGIN_MESSAGE_MAP(CNuvoISPDlg_MKROM, CNuvoISPDlg)
+    //{{AFX_MSG_MAP(CNuvoISPDlg_MKROM)
+    ON_BN_CLICKED(IDC_BUTTON_LDROM, OnButtonLoadFile)
+    ON_BN_CLICKED(IDC_CHECK_RUN_APROM, OnButtonCheckReset)
+END_MESSAGE_MAP()
+
+
+CNuvoISPDlg_MKROM::CNuvoISPDlg_MKROM(UINT Template, CWnd *pParent /*=NULL*/)
+    : CNuvoISPDlg(Template, pParent)
+{
+    WINCTRLID buddy[] = {
+        {IDC_BUTTON_APROM, IDC_EDIT_FILEPATH_APROM, IDC_STATIC_FILEINFO_APROM},
+        {IDC_BUTTON_NVM, IDC_EDIT_FILEPATH_NVM, IDC_STATIC_FILEINFO_NVM},
+        {IDC_BUTTON_LDROM, IDC_EDIT_FILEPATH_LDROM, IDC_STATIC_FILEINFO_LDROM},
+    };
+    memcpy(&m_CtrlID, buddy, sizeof(m_CtrlID));
+}
+
+CNuvoISPDlg_MKROM::~CNuvoISPDlg_MKROM()
+{
+}
+
+void CNuvoISPDlg_MKROM::OnButtonCheckReset()
+{
+    UpdateData(TRUE);
+
+    if (m_bRunAPROM == 2) {
+        SetDlgItemText(IDC_CHECK_RUN_APROM, _T("Reset and Run (LDROM)"));
+    } else if (m_bRunAPROM == 1) {
+        SetDlgItemText(IDC_CHECK_RUN_APROM, _T("Reset and Run (APROM)"));
+    } else {
+        SetDlgItemText(IDC_CHECK_RUN_APROM, _T("Reset and Run (APROM or LDROM)"));
+    }
+}
+
+BOOL CNuvoISPDlg_MKROM::OnInitDialog()
+{
+    CNuvoISPDlg::OnInitDialog();
+    InitComboBox(0);
+    return TRUE;	// return TRUE  unless you set the focus to a control
 }
