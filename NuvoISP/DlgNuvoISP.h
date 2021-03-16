@@ -20,11 +20,8 @@ class CNuvoISPDlg: public CDialogMain, public CISPProc
 {
 // Construction
 public:
-#if (SUPPORT_SPIFLASH)
     enum { IDD = IDD_DIALOG_NUVOISP_WITH_SPI};
-#else
-    enum { IDD = IDD_DIALOG_NUVOISP};
-#endif
+
 
     BOOL m_bShowSPI;
     void ShowSPIOptions(BOOL bShow);

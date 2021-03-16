@@ -12,11 +12,7 @@
 
 #include "fileinfo.h"
 
-#if (SUPPORT_SPIFLASH)
 #define NUM_VIEW 3
-#else
-#define NUM_VIEW 2
-#endif
 
 #define MSG_USER_EVENT				(WM_APP+1)
 #define MSG_UPDATE_ERASE_STATUS		3
@@ -42,6 +38,7 @@ enum EProcSts {
     EPS_ERR_SIZE = 6,
     EPS_PROG_DONE = 7,
     EPS_ERR_SPI = 9,
+    EPS_ERR_LDROM = 10,
 };	// m_eProcSts
 
 class CISPProc
@@ -102,11 +99,15 @@ public:
     BOOL	m_bProgram_Config;
     BOOL	m_bErase;
     BOOL	m_bRunAPROM;
-#if (SUPPORT_SPIFLASH)
-    BOOL	m_bSupport_SPI;
+
+    BOOL	m_bSupport_SPI; // CMD_Connect
     BOOL	m_bProgram_SPI;
     BOOL	m_bErase_SPI;
-#endif
+
+    BOOL	m_bProgram_LDROM;
+
+
+
     // ISPLdCMD2 supports different protocol for CAN interface
     ISPLdCMD2	m_ISPLdDev;
     void SetInterface(unsigned int it, CString str)

@@ -15,6 +15,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+#define SUPPORT_SPIFLASH (1) // temp, need to remove this option
+
 inline std::string size_str(unsigned int size)
 {
     char buf[128];
@@ -68,9 +70,7 @@ CNuvoISPDlg::CNuvoISPDlg(UINT Template,
     WINCTRLID buddy[] = {
         {IDC_BUTTON_APROM, IDC_EDIT_FILEPATH_APROM, IDC_STATIC_FILEINFO_APROM},
         {IDC_BUTTON_NVM, IDC_EDIT_FILEPATH_NVM, IDC_STATIC_FILEINFO_NVM},
-#if (SUPPORT_SPIFLASH)
         {IDC_BUTTON_SPI, IDC_EDIT_FILEPATH_SPI, IDC_STATIC_FILEINFO_SPI},
-#endif
     };
     memcpy(&m_CtrlID, buddy, sizeof(m_CtrlID));
     m_bShowSPI = -1; // not initialized
@@ -121,9 +121,7 @@ BEGIN_MESSAGE_MAP(CNuvoISPDlg, CDialog)
     ON_BN_CLICKED(IDC_BUTTON_CONNECT, OnButtonConnect)
     ON_BN_CLICKED(IDC_BUTTON_APROM, OnButtonLoadFile)
     ON_BN_CLICKED(IDC_BUTTON_NVM, OnButtonLoadFile)
-#if (SUPPORT_SPIFLASH)
     ON_BN_CLICKED(IDC_BUTTON_SPI, OnButtonLoadFile)
-#endif
     ON_BN_CLICKED(IDC_BUTTON_START, OnButtonStart)
     ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_DATA, OnSelchangeTabData)
     ON_BN_CLICKED(IDC_BUTTON_CONFIG, OnButtonConfig)
@@ -169,7 +167,7 @@ BOOL CNuvoISPDlg::OnInitDialog()
     m_sConnect = _T("Disconnected");
     UpdateData(FALSE);
     // Title
-    SetWindowText(_T("Nuvoton NuMicro ISP Programming Tool 4.04"));
+    SetWindowText(_T("Nuvoton NuMicro ISP Programming Tool 5.00"));
 
     // Set data view area
     // Btn Text --> Tab Text

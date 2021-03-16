@@ -2,7 +2,6 @@
 #define INC__ISP_LD_H__
 #pragma once
 
-#define SUPPORT_SPIFLASH (1)
 
 #include "CScopedMutex.hpp"
 #include "Interface\CHidIO2.h"
@@ -71,10 +70,9 @@ public:
         CMD_CONNECT			= 0x000000AE,
         CMD_UPDATE_DATAFLASH = 0x000000C3,
         CMD_RESEND_PACKET   = 0x000000FF,
-#if (SUPPORT_SPIFLASH)
-        CMD_ERASE_SPIFLASH = 0x000000D0,
+        CMD_ERASE_SPIFLASH  = 0x000000D0,
         CMD_UPDATE_SPIFLASH = 0x000000D1,
-#endif
+        CMD_UPDATE_LDROM    = 0x000000D2,
     };
 
     BOOL CMD_Connect(DWORD dwMilliseconds = 30);
@@ -96,6 +94,11 @@ public:
                    unsigned long cur_addr,
                    const char *buffer,
                    unsigned long *update_len);
+    void UpdateLDROM(unsigned long start_addr,
+                     unsigned long total_len,
+                     unsigned long cur_addr,
+                     const char *buffer,
+                     unsigned long *update_len);
 
     BOOL EraseAll();
 
@@ -112,10 +115,10 @@ public:
     };
     CString m_strDevPathName;
 
-#if (SUPPORT_SPIFLASH)
+
     BOOL Cmd_ERASE_SPIFLASH(unsigned long offset, unsigned long total_len);
     BOOL Cmd_UPDATE_SPIFLASH(unsigned long offset, unsigned long total_len, const char *buffer);
-#endif
+
 };
 
 class ISPLdCMD2 : public ISPLdCMD
