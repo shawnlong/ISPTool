@@ -218,6 +218,9 @@
     <ClCompile Include="DialogConfiguration\DialogChipSetting_CFG_M2351.cpp">
       <Filter>External\DialogConfiguration</Filter>
     </ClCompile>
+    <ClCompile Include="DialogChipSelect.cpp">
+      <Filter>ISPTool</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\k-cm-memory.ico">

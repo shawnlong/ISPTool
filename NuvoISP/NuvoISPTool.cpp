@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "NuvoISPTool.h"
+#include "DialogChipSelect.h"
 #include "DlgNuvoISP.h"
 
 #ifdef _DEBUG
@@ -165,7 +166,18 @@ BOOL CISPToolApp::InitInstance()
     }
 _UI_MODE:
     SetRegistryKey(_T("NuvotonISP"));
-    CNuvoISPDlg_MKROM MainDlg;
-    MainDlg.DoModal();
+    CDialogChipSelect SelDlg;
+    int nResponse = SelDlg.DoModal();
+
+    if (nResponse == IDOK) {
+        if (SelDlg.m_nSelect == 1) {
+            CNuvoISPDlg MainDlg;
+            MainDlg.DoModal();
+        } else if (SelDlg.m_nSelect == 0) {
+            CNuvoISPDlg_MKROM MainDlg;
+            MainDlg.DoModal();
+        }
+    }
+
     return FALSE;
 }
