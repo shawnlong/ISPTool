@@ -151,6 +151,8 @@ void CISPProc::Thread_CheckUSBConnect()
 
             try {
                 if (m_ISPLdDev.MKROM_Connect(1)) {
+                    // Re-Open COM Port to clear previous status
+                    m_ISPLdDev.ReOpen_Port();
                     break;
                 }
             } catch (...) {
