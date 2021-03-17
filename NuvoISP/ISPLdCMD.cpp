@@ -7,15 +7,11 @@
 
 #define printf(...)
 
-// interface
-#define INTF_HID     (1)
-#define INTF_UART    (2)
-#define INTF_CAN     (6)
 
 ISPLdCMD::ISPLdCMD()
     : m_bOpenPort(FALSE)
     , m_uCmdIndex(18)	// Do not use 0 to avoid firmware already has index 0 occasionally.
-    , m_iIspType(0)     // 0: LDROM ISP, 1: MKROM IPS
+    , m_iIspType(TYPE_LDROM)
 {
     //Test();
 }
@@ -562,6 +558,42 @@ BOOL ISPLdCMD::EraseAll()
 
     return ret;
 }
+
+BOOL ISPLdCMD::MKROM_Connect(DWORD dwMilliseconds)
+{
+    if ((m_iIspType != TYPE_MKROM) || (m_uInterface != INTF_UART)) {
+        return TRUE; // Skip
+    }
+
+    if (!m_bOpenPort) {
+        throw _T("There is no Nu-Link connected to a USB port.");
+    }
+
+    // BOOL ISPLdCMD::WriteFile
+    memset(m_acBuffer, 0, sizeof(m_acBuffer));
+    m_acBuffer[0] = 'a';
+    m_acBuffer[1] = 'a';
+    m_acBuffer[2] = 'a';
+    m_acBuffer[3] = 'a';
+    DWORD dwLength;
+
+    if (m_comIO.WriteFile(m_acBuffer, 4, &dwLength, dwMilliseconds)) {
+        if (!m_comIO.ReadFile(m_acBuffer, 1, &dwLength, dwMilliseconds)) {
+            printf("NG in m_comIO.ReadFile\n");
+            return FALSE;
+        }
+
+        if (m_acBuffer[0] == 'A') {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    } else {
+        Close_Port();
+        return FALSE;
+    }
+}
+
 
 BOOL ISPLdCMD::CMD_Connect(DWORD dwMilliseconds)
 {

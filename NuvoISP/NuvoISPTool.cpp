@@ -167,14 +167,17 @@ BOOL CISPToolApp::InitInstance()
 _UI_MODE:
     SetRegistryKey(_T("NuvotonISP"));
     CDialogChipSelect SelDlg;
+    SelDlg.m_sCaption = _T("Nuvoton NuMicro ISP Programming Tool 5.00");
     int nResponse = SelDlg.DoModal();
 
     if (nResponse == IDOK) {
         if (SelDlg.m_nSelect == 1) {
             CNuvoISPDlg MainDlg;
+            MainDlg.m_sCaption = _T("Nuvoton NuMicro ISP Programming Tool 5.00 - LDROM");
             MainDlg.DoModal();
         } else if (SelDlg.m_nSelect == 0) {
             CNuvoISPDlg_MKROM MainDlg;
+            MainDlg.m_sCaption = _T("Nuvoton NuMicro ISP Programming Tool 5.00 - MKROM");
             MainDlg.DoModal();
         }
     }

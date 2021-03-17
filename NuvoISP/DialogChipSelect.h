@@ -19,7 +19,7 @@ class CDialogChipSelect : public CDialog
 public:
     CDialogChipSelect(CWnd *pParent = NULL);   // standard constructor
     int m_nSelect;
-
+    CString m_sCaption;
 
 // Dialog Data
     //{{AFX_DATA(CDialogChipSelect)

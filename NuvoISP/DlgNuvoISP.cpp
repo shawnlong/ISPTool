@@ -60,6 +60,7 @@ CNuvoISPDlg::CNuvoISPDlg(UINT Template,
     : CDialogMain(Template, pParent)
     , CISPProc(&m_hWnd)
 {
+    m_sCaption = _T("");
     m_bConnect = false;
     int i = 0, j = 0;
 
@@ -144,30 +145,14 @@ END_MESSAGE_MAP()
 BOOL CNuvoISPDlg::OnInitDialog()
 {
     CDialogMain::OnInitDialog();
-    // IDM_ABOUTBOX must be in the system command range.
-    ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
-    ASSERT(IDM_ABOUTBOX < 0xF000);
-    CMenu *pSysMenu = GetSystemMenu(FALSE);
-
-    if (pSysMenu != NULL) {
-        CString strAboutMenu;
-        strAboutMenu = _T("About Nuvoton NuMicro ISP Programming Tool(&A)");
-
-        if (!strAboutMenu.IsEmpty()) {
-            pSysMenu->AppendMenu(MF_SEPARATOR);
-            pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
-        }
-    }
-
     m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
     // Set the icon for this dialog.  The framework does this automatically
     //  when the application's main window is not a dialog
     SetIcon(m_hIcon, TRUE);			// Set big icon
     SetIcon(m_hIcon, FALSE);		// Set small icon
+    SetWindowText(m_sCaption);
     m_sConnect = _T("Disconnected");
     UpdateData(FALSE);
-    // Title
-    SetWindowText(_T("Nuvoton NuMicro ISP Programming Tool 5.00"));
 
     // Set data view area
     // Btn Text --> Tab Text
@@ -1165,6 +1150,7 @@ CNuvoISPDlg_MKROM::CNuvoISPDlg_MKROM(UINT Template, CWnd *pParent /*=NULL*/)
         {IDC_BUTTON_LDROM, IDC_EDIT_FILEPATH_LDROM, IDC_STATIC_FILEINFO_LDROM},
     };
     memcpy(&m_CtrlID, buddy, sizeof(m_CtrlID));
+    m_ISPLdDev.m_iIspType = TYPE_MKROM;
 }
 
 CNuvoISPDlg_MKROM::~CNuvoISPDlg_MKROM()

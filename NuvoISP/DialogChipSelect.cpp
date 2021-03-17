@@ -20,6 +20,7 @@ CDialogChipSelect::CDialogChipSelect(CWnd *pParent /*=NULL*/)
     : CDialog(CDialogChipSelect::IDD, pParent)
     , m_nSelect(0) // 0: LDROM, 1: MKROM
 {
+    m_sCaption = _T("Nuvoton NuMicro ISP Programming Tool");
 }
 
 
@@ -45,6 +46,10 @@ END_MESSAGE_MAP()
 BOOL CDialogChipSelect::OnInitDialog()
 {
     CDialog::OnInitDialog();
+    HICON hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+    SetIcon(hIcon, TRUE);			// Set big icon
+    SetIcon(hIcon, FALSE);		// Set small icon
+    SetWindowText(m_sCaption);
     const TCHAR *_sURL[] = {
         _T("https://github.com/OpenNuvoton/ISPTool/"),
         _T("https://gitee.com/OpenNuvoton/ISPTool/"),

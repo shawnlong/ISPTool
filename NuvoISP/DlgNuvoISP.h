@@ -23,6 +23,7 @@ public:
     enum { IDD = IDD_DIALOG_NUVOISP_WITH_SPI};
 
 
+    CString m_sCaption;
     BOOL m_bShowSPI;
     virtual void ShowSPIOptions(BOOL bShow);
 
