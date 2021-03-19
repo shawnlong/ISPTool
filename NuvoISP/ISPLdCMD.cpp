@@ -13,14 +13,13 @@ ISPLdCMD::ISPLdCMD()
     , m_uCmdIndex(18)	// Do not use 0 to avoid firmware already has index 0 occasionally.
     , m_iIspType(TYPE_LDROM)
 {
-    //Test();
 }
 
 ISPLdCMD::~ISPLdCMD()
 {
 }
 
-bool ISPLdCMD::Open_Port(BOOL bErrorMsg)
+bool ISPLdCMD::Open_Port()
 {
     if (m_bOpenPort) {
         return true;
@@ -31,42 +30,51 @@ bool ISPLdCMD::Open_Port(BOOL bErrorMsg)
     ScopedMutex scopedLock(m_Mutex);
 
     switch (m_uInterface) {
-        case 1:
-            if (m_hidIO.OpenDevice(0x0416, 0x3F00, -1)) {	// ISP FW >= 0x30
-                m_uUSB_PID = 0x3F00;
-            } else if (m_hidIO.OpenDevice(0x0416, 0xA316, -1)) {	// ISP FW < 0x30
-                m_uUSB_PID = 0xA316;
+        case INTF_HID:
+            if (m_iIspType == TYPE_LDROM) {
+                if (m_hidIO.OpenDevice(0x0416, 0x3F00, -1)) {	// ISP FW >= 0x30
+                    m_uUSB_PID = 0x3F00;
+                } else if (m_hidIO.OpenDevice(0x0416, 0xA316, -1)) {	// ISP FW < 0x30
+                    m_uUSB_PID = 0xA316;
+                } else {
+                    return false;
+                }
+            } else  if (m_iIspType == TYPE_MKROM) {
+                // Temp ID
+                if (m_hidIO.OpenDevice(0x0416, 0x3F00, -1)) {	// ISP FW >= 0x30
+                    m_uUSB_PID = 0x3F00;
+                } else {
+                    return false;
+                }
             } else {
-                return false;
+                throw _T("Invalid ISP Type.");
             }
 
             m_strDevPathName = m_hidIO.GetDevicePath();
             break;
 
-        case 2:
+        case INTF_UART:
             if (!m_comIO.OpenDevice(m_strComNum)) {
-                //        if(bErrorMsg)
-                //printf("No upload Device Found, Please Check the Link!\n");
                 return false;
             }
 
             break;
 
-        case 3:
-        case 4:
-        case 5:
-        case 6:
-            if (m_hidIO2.OpenDevice(0x0416, 0x5201, 5)) {	// Nu-Link2 with ISP-Bridge
+        case INTF_SPI:
+        case INTF_I2C:
+        case INTF_RS485:
+        case INTF_CAN:
+            if (m_hidIO.OpenDevice(0x0416, 0x5201, 5)) {	// Nu-Link2 with ISP-Bridge
                 m_uUSB_PID = 0x5201;
-            } else if (m_hidIO2.OpenDevice(0x0416, 0x5203, 5)) {	// Nu-Link2 with ISP-Bridge
+            } else if (m_hidIO.OpenDevice(0x0416, 0x5203, 5)) {	// Nu-Link2 with ISP-Bridge
                 m_uUSB_PID = 0x5203;
-            } else if (m_hidIO2.OpenDevice(0x0416, 0x3F10, -1)) {	// ISP-Bridge
+            } else if (m_hidIO.OpenDevice(0x0416, 0x3F10, -1)) {	// ISP-Bridge
                 m_uUSB_PID = 0x3F10;
             } else {
                 return false;
             }
 
-            m_strDevPathName = m_hidIO2.GetDevicePath();
+            m_strDevPathName = m_hidIO.GetDevicePath();
             break;
 
         default:
@@ -89,19 +97,19 @@ void ISPLdCMD::Close_Port()
     m_bOpenPort = FALSE;
 
     switch (m_uInterface) {
-        case 1:
+        case INTF_HID:
             m_hidIO.CloseDevice();
             break;
 
-        case 2:
+        case INTF_UART:
             m_comIO.CloseDevice();
             break;
 
-        case 3:
-        case 4:
-        case 5:
-        case 6:
-            m_hidIO2.CloseDevice();
+        case INTF_SPI:
+        case INTF_I2C:
+        case INTF_RS485:
+        case INTF_CAN:
+            m_hidIO.CloseDevice();
             break;
 
         default:
@@ -124,7 +132,7 @@ BOOL ISPLdCMD::WriteFileCAN(ULONG uCMD, ULONG uDAT, DWORD dwMilliseconds)
     *((ULONG *)&m_acBuffer[3]) = uCMD;
     *((ULONG *)&m_acBuffer[7]) = uDAT;
     DWORD dwLength;
-    return m_hidIO2.WriteFile(m_acBuffer, 65, &dwLength, dwMilliseconds);
+    return m_hidIO.WriteFile(m_acBuffer, 65, &dwLength, dwMilliseconds);
 }
 
 BOOL ISPLdCMD::ReadFileCAN(DWORD dwMilliseconds)
@@ -139,7 +147,7 @@ BOOL ISPLdCMD::ReadFileCAN(DWORD dwMilliseconds)
 
     DWORD dwLength;
 
-    if (!m_hidIO2.ReadFile(m_acBuffer, 65, &dwLength, dwMilliseconds)) {
+    if (!m_hidIO.ReadFile(m_acBuffer, 65, &dwLength, dwMilliseconds)) {
         return FALSE;
     }
 
@@ -184,14 +192,14 @@ BOOL ISPLdCMD::ReadFile(char *pcBuffer, size_t szMaxLen, DWORD dwMilliseconds, B
         DWORD dwLength;
 
         switch (m_uInterface) {
-            case 1:
+            case INTF_HID:
                 if (!m_hidIO.ReadFile(m_acBuffer, 65, &dwLength, dwMilliseconds)) {
                     return FALSE;
                 }
 
                 break;
 
-            case 2:
+            case INTF_UART:
                 if (!m_comIO.ReadFile(m_acBuffer + 1, 64, &dwLength, dwMilliseconds)) {
                     printf("NG in m_comIO.ReadFile\n");
                     return FALSE;
@@ -199,10 +207,10 @@ BOOL ISPLdCMD::ReadFile(char *pcBuffer, size_t szMaxLen, DWORD dwMilliseconds, B
 
                 break;
 
-            case 3:
-            case 4:
-            case 5:
-                if (!m_hidIO2.ReadFile(m_acBuffer, 65, &dwLength, dwMilliseconds)) {
+            case INTF_SPI:
+            case INTF_I2C:
+            case INTF_RS485:
+                if (!m_hidIO.ReadFile(m_acBuffer, 65, &dwLength, dwMilliseconds)) {
                     return FALSE;
                 }
 
@@ -271,19 +279,19 @@ BOOL ISPLdCMD::WriteFile(unsigned long uCmd, const char *pcBuffer, DWORD dwLen, 
     BOOL bRet = FALSE;
 
     switch (m_uInterface) {
-        case 1:
+        case INTF_HID:
             bRet = m_hidIO.WriteFile(m_acBuffer, 65, &dwLength, dwMilliseconds);
             break;
 
-        case 2:
+        case INTF_UART:
             bRet = m_comIO.WriteFile(m_acBuffer + 1, 64, &dwLength, dwMilliseconds);
             break;
 
-        case 3:
-        case 4:
-        case 5:
+        case INTF_SPI:
+        case INTF_I2C:
+        case INTF_RS485:
             m_acBuffer[2] = static_cast<CHAR>(m_uInterface);
-            bRet = m_hidIO2.WriteFile(m_acBuffer, 65, &dwLength, dwMilliseconds);
+            bRet = m_hidIO.WriteFile(m_acBuffer, 65, &dwLength, dwMilliseconds);
             break;
 
         default:
@@ -522,28 +530,6 @@ void ISPLdCMD::UpdateNVM(unsigned long start_addr,
     }
 }
 
-void ISPLdCMD::Test()
-{
-    SetInterface(1, _T(""));
-
-    if (!Open_Port()) {
-        printf("Open_Port failed\n");
-        return;
-    }
-
-    printf("Open_Port successed\n");
-    SyncPackno();
-    unsigned char cVer = GetVersion();
-    unsigned long sDID = GetDeviceID();
-    unsigned int config[2];
-    ReadConfig(config);
-    printf("GetVersion: %X\n", cVer);
-    printf("GetDeviceID: %X\n", sDID);
-    printf("ReadConfig: %X, %X\n", config[0], config[1]);
-    Close_Port();
-}
-
-
 BOOL ISPLdCMD::EraseAll()
 {
     if (m_uInterface == INTF_CAN) {
@@ -562,7 +548,7 @@ BOOL ISPLdCMD::EraseAll()
 BOOL ISPLdCMD::MKROM_Connect(DWORD dwMilliseconds)
 {
     if ((m_iIspType != TYPE_MKROM) || (m_uInterface != INTF_UART)) {
-        return TRUE; // Skip
+        return TRUE; // Always Pass
     }
 
     if (!m_bOpenPort) {
@@ -739,7 +725,7 @@ void ISPLdCMD::UpdateLDROM(unsigned long start_addr,
                            const char *buffer,
                            unsigned long *update_len)
 {
-    if (m_uInterface == INTF_CAN) {
+    if (m_iIspType != TYPE_MKROM) {
         return; // not support
     }
 
