@@ -7,10 +7,9 @@
 
 #define printf(...)
 
-
 ISPLdCMD::ISPLdCMD()
     : m_bOpenPort(FALSE)
-    , m_uCmdIndex(18)	// Do not use 0 to avoid firmware already has index 0 occasionally.
+    , m_uCmdIndex(18)	//Do not use 0 to avoid firmware already has index 0 occasionally.
     , m_iIspType(TYPE_LDROM)
 {
 }
@@ -326,7 +325,7 @@ void ISPLdCMD::SyncPackno()
 unsigned char ISPLdCMD::GetVersion()
 {
     if (m_uInterface == INTF_CAN) {
-        return 0x40; // not support
+        return 0xCA; // not support
     }
 
     WriteFile(
@@ -580,9 +579,10 @@ BOOL ISPLdCMD::MKROM_Connect(DWORD dwMilliseconds)
     }
 }
 
-
 BOOL ISPLdCMD::CMD_Connect(DWORD dwMilliseconds)
 {
+    bSupport_SPI = 0;
+
     if (m_uInterface == INTF_CAN) {
         BOOL ret = FALSE;
 

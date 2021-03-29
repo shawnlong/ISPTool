@@ -108,7 +108,7 @@ public:
     // For M480HD MKROM only
     BOOL	m_bProgram_LDROM;
 
-    // ISPLdCMD2 supports different protocol for CAN interface
+    // ISPLdCMD supports different protocol for CAN interface
     ISPLdCMD	m_ISPLdDev;
     void SetInterface(unsigned int it, CString str)
     {

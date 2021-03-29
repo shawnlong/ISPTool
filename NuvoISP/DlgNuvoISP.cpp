@@ -15,8 +15,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#define SUPPORT_SPIFLASH (1) // temp, need to remove this option
-
 inline std::string size_str(unsigned int size)
 {
     char buf[128];
@@ -60,7 +58,7 @@ CNuvoISPDlg::CNuvoISPDlg(UINT Template,
     : CDialogMain(Template, pParent)
     , CISPProc(&m_hWnd)
 {
-    m_sCaption = _T("");
+    m_sCaption = _T("Nuvoton NuMicro ISP Programming Tool 4.XX");
     m_bConnect = false;
     int i = 0, j = 0;
 
@@ -100,10 +98,9 @@ void CNuvoISPDlg::DoDataExchange(CDataExchange *pDX)
     DDX_Text(pDX, IDC_STATIC_CONNECT, m_sConnect);
     DDX_Check(pDX, IDC_CHECK_APROM, m_bProgram_APROM);
     DDX_Check(pDX, IDC_CHECK_NVM, m_bProgram_NVM);
-//#if (SUPPORT_SPIFLASH)
+// Do NOT use DDX_Check for extend option
 //    DDX_Check(pDX, IDC_CHECK_SPI, m_bProgram_SPI);
 //    DDX_Check(pDX, IDC_CHECK_ERASE_SPI, m_bErase_SPI);
-//#endif
     DDX_Check(pDX, IDC_CHECK_CONFIG, m_bProgram_Config);
     DDX_Check(pDX, IDC_CHECK_ERASE, m_bErase);
     DDX_Check(pDX, IDC_CHECK_RUN_APROM, m_bRunAPROM);
@@ -150,9 +147,10 @@ BOOL CNuvoISPDlg::OnInitDialog()
     //  when the application's main window is not a dialog
     SetIcon(m_hIcon, TRUE);			// Set big icon
     SetIcon(m_hIcon, FALSE);		// Set small icon
-    SetWindowText(m_sCaption);
     m_sConnect = _T("Disconnected");
     UpdateData(FALSE);
+    // Title
+    SetWindowText(m_sCaption);
 
     // Set data view area
     // Btn Text --> Tab Text
@@ -470,7 +468,6 @@ void CNuvoISPDlg::OnButtonStart()
 {
     // TODO: Add your control notification handler code here
     UpdateData(TRUE);
-    /* Try to reload file if necessary */
     // M487KMCAN
     m_bProgram_SPI = IsDlgButtonChecked(IDC_CHECK_SPI);
     m_bErase_SPI = IsDlgButtonChecked(IDC_CHECK_ERASE_SPI);
