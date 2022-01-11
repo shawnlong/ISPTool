@@ -36,7 +36,11 @@ protected:
 
 
     BOOL ReadFile(char *pcBuffer, size_t szMaxLen, DWORD dwMilliseconds, BOOL bCheckIndex = TRUE);
+    BOOL ReadM48xResp(char* pcBuffer, size_t szMaxLen, DWORD dwMilliseconds);
     BOOL WriteFile(unsigned long uCmd, const char *pcBuffer = NULL, DWORD dwLen = 0, DWORD dwMilliseconds = 20/*USBCMD_TIMEOUT*/);
+
+    BOOL WriteM48xCmd(const char ucAddr, unsigned char ucCmd, unsigned char ucTarget, unsigned char ucType, const char* pcBuffer, unsigned short usLen, DWORD dwMilliseconds);
+
 
     // For CAN interface
     BOOL ReadFileCAN(DWORD dwMilliseconds = 5000);
