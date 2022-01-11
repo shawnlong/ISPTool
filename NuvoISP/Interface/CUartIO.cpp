@@ -57,13 +57,13 @@ BOOL CUartIO::OpenDevice(CString strComNum)
         GetCommState(m_hCOMHandle, &dcb) ;        //讀串口原來的參數設置
         dcb.BaudRate = 115200;                    //Baudrate;
         dcb.ByteSize = 8;
-        dcb.Parity = NOPARITY;
+        dcb.Parity = SPACEPARITY;
         dcb.StopBits = ONESTOPBIT ;
         dcb.fBinary = TRUE ;
         dcb.fParity = FALSE;
         // Nulink ver.2.05.6807, 2018.09.05
         // Nu-Link VCOM firmware flow has been updated, PC software has to "Set Control Line State" to indicate DTE is present.
-        dcb.fDtrControl = DTR_CONTROL_ENABLE;
+        //dcb.fDtrControl = DTR_CONTROL_ENABLE;
         SetCommState(m_hCOMHandle, &dcb);					//串口參數配置
         SetCommMask(m_hCOMHandle, EV_RXCHAR | EV_TXEMPTY);	//設置事件驅動的類型
         SetupComm(m_hCOMHandle, 1024, 128) ;				//設置輸入,輸出緩衝區的大小
@@ -71,6 +71,35 @@ BOOL CUartIO::OpenDevice(CString strComNum)
                   | PURGE_RXCLEAR);                //清乾淨輸入、輸出緩衝區
     }
 
+    return TRUE;
+}
+
+BOOL CUartIO::SetParity(const char mode)
+{
+    DCB dcb;                    //定義資料控制塊結構
+    SecureZeroMemory(&dcb, sizeof(DCB));
+    dcb.DCBlength = sizeof(DCB);
+    GetCommState(m_hCOMHandle, &dcb);        //讀串口原來的參數設置
+    switch (mode)
+    {
+    case 'S':
+        dcb.Parity = SPACEPARITY;
+        break;
+    case 'M':
+        dcb.Parity = MARKPARITY;
+        break;
+    case 'O':
+        dcb.Parity = ODDPARITY;
+        break;
+    case 'E':
+        dcb.Parity = EVENPARITY;
+        break;
+    default:
+        break;
+    }
+    SetCommState(m_hCOMHandle, &dcb);					//串口參數配置
+    SetCommMask(m_hCOMHandle, EV_RXCHAR | EV_TXEMPTY);
+    
     return TRUE;
 }
 

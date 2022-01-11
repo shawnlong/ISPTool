@@ -237,6 +237,30 @@ BOOL ISPLdCMD::ReadFile(char *pcBuffer, size_t szMaxLen, DWORD dwMilliseconds, B
     return FALSE;
 }
 
+BOOL ISPLdCMD::ReadM48xResp(char* pcBuffer, size_t szMaxLen, DWORD dwMilliseconds)
+{
+    bResendFlag = FALSE;
+
+    while (1) {
+        if (!m_bOpenPort) {
+            throw _T("There is no Nu-Link connected to a USB port.");
+        }
+
+        DWORD dwLength;
+
+        if (!m_comIO.ReadFile(pcBuffer, 7, &dwLength, dwMilliseconds)) {
+            printf("NG in m_comIO.ReadFile\n");
+            return FALSE;
+        }
+
+        if (dwLength >= 7) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
 BOOL ISPLdCMD::WriteFile(unsigned long uCmd, const char *pcBuffer, DWORD dwLen, DWORD dwMilliseconds)
 {
     if (!m_bOpenPort) {
@@ -271,6 +295,7 @@ BOOL ISPLdCMD::WriteFile(unsigned long uCmd, const char *pcBuffer, DWORD dwLen, 
             break;
 
         case INTF_UART:
+            m_comIO.SetParity('S');
             bRet = m_comIO.WriteFile(m_acBuffer + 1, 64, &dwLength, dwMilliseconds);
             break;
 
@@ -288,6 +313,54 @@ BOOL ISPLdCMD::WriteFile(unsigned long uCmd, const char *pcBuffer, DWORD dwLen, 
     if (bRet != FALSE) {
         m_uCmdIndex += 2;
     } else {
+        Close_Port();
+    }
+
+    printf("Write Cmd : %X\n", uCmd);
+    return bRet;
+}
+
+BOOL ISPLdCMD::WriteM48xCmd(const char ucAddr, unsigned char ucCmd, unsigned char ucTarget, unsigned char ucType, const char* pcBuffer, unsigned short usLen, DWORD dwMilliseconds)
+{
+    if (!m_bOpenPort) {
+        throw _T("There is no Nu-Link connected to a USB port.");
+    }
+    else if (m_uInterface == INTF_CAN) {
+        throw _T("This API can not be used by CAN.");
+    }
+
+    /* Set new package index value */
+    if (usLen > sizeof(m_acBuffer) - 8) {
+        usLen = sizeof(m_acBuffer) - 8;
+    }
+
+    memset(m_acBuffer, 0, sizeof(m_acBuffer));
+    //m_acBuffer[0] = 0x00;	//Always 0x00
+    *((USHORT*)&m_acBuffer[0]) = usLen + 6;
+    m_acBuffer[2] = 0x18;
+    m_acBuffer[3] = 0x04;
+    m_acBuffer[4] = ucCmd;
+    m_acBuffer[5] = ucAddr;
+    m_acBuffer[6] = ucTarget;
+    m_acBuffer[7] = ucType;
+
+    if (pcBuffer != NULL && usLen > 0) {
+        memcpy(m_acBuffer + 8, pcBuffer, usLen);
+    }
+
+    m_usCheckSum = Checksum((unsigned char*)&m_acBuffer[1], sizeof(m_acBuffer) - 1);
+    DWORD dwLength;
+    BOOL bRet = FALSE;
+
+    bRet = m_comIO.SetParity('M');
+    bRet = m_comIO.WriteFile(&ucAddr, 1, &dwLength, dwMilliseconds);
+    bRet = m_comIO.SetParity('S');
+    bRet = m_comIO.WriteFile(m_acBuffer, usLen + 8, &dwLength, dwMilliseconds);
+
+    if (bRet != FALSE) {
+        m_uCmdIndex += 2;
+    }
+    else {
         Close_Port();
     }
 
@@ -553,7 +626,19 @@ BOOL ISPLdCMD::CMD_Connect(DWORD dwMilliseconds)
     BOOL ret = FALSE;
     DWORD dwStart = GetTickCount();
     unsigned long uID;
-
+    char resp[7];
+    if (m_uInterface == INTF_UART)
+    {
+        if (WriteM48xCmd(0x0A, 0xB5, 0xFE, 0x0, NULL, 0, 0))
+        {
+            
+            ret = ReadM48xResp((char*)resp, 7, dwMilliseconds);
+        }
+        if (!ret)
+        {
+            //  return ret;
+        }
+    }
     if (WriteFile(CMD_CONNECT, NULL, 0)) {
         ret = ReadFile((char *)&uID, 4, dwMilliseconds, FALSE);
     }

@@ -11,6 +11,7 @@ public:
     virtual ~CUartIO();
     void CloseDevice();
     BOOL OpenDevice(CString strComNum);
+    BOOL SetParity(const char mode);
     BOOL ReadFile(char *pcBuffer, DWORD szMaxLen, DWORD *pdwLength, DWORD dwMilliseconds);
     BOOL WriteFile(const char *pcBuffer, DWORD szLen, DWORD *pdwLength, DWORD dwMilliseconds);
     //OVERLAPPED m_overlapped;
