@@ -425,6 +425,22 @@ unsigned long ISPLdCMD::GetDeviceID()
     return uID;
 }
 
+unsigned char ISPLdCMD::GetDeviceRunMode()
+{
+    if (m_uInterface == INTF_CAN) {
+            return 0;
+    }
+
+    WriteFile(
+        CMD_GET_DEVICE_MODE,
+        NULL,
+        0,
+        USBCMD_TIMEOUT);
+    unsigned char cMode;
+    ReadFile((char*)&cMode, 4, USBCMD_TIMEOUT, TRUE);
+    return cMode;
+}
+
 #define FMC_USER_CONFIG_0       0x00300000UL
 
 void ISPLdCMD::ReadConfig(unsigned int config[])

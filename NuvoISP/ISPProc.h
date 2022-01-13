@@ -80,6 +80,7 @@ public:
 
     unsigned char m_ucFW_VER;
     unsigned int m_ulDeviceID;
+    unsigned char m_ucDeviceMode;
     unsigned int m_CONFIG[4];
     unsigned int m_CONFIG_User[4];
 

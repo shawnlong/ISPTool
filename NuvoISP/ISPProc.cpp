@@ -185,6 +185,7 @@ void CISPProc::Thread_CheckDeviceConnect()
                 m_ISPLdDev.SyncPackno();
                 m_ucFW_VER = m_ISPLdDev.GetVersion();
                 m_ulDeviceID = m_ISPLdDev.GetDeviceID();
+                m_ucDeviceMode = m_ISPLdDev.GetDeviceRunMode();
                 m_ISPLdDev.ReadConfig(m_CONFIG);
                 memcpy(m_CONFIG_User, m_CONFIG, sizeof(m_CONFIG));
                 m_bSupport_SPI = m_ISPLdDev.bSupport_SPI;
@@ -265,6 +266,14 @@ void CISPProc::Thread_ProgramFlash()
         }
 
         if (m_bProgram_APROM) {
+            if (m_ucDeviceMode == 0x01/*aprom running*/)
+            {
+                m_uAPROM_Offset = 0x40000;
+            }
+            if (m_ucDeviceMode == 0x02/*ldrom running*/)
+            {
+                m_uAPROM_Offset = 0x0;
+            }
             uAddr = m_uAPROM_Addr + m_uAPROM_Offset;
             uSize = m_sFileInfo[0].st_size;
             pBuffer = vector_ptr(m_sFileInfo[0].vbuf);

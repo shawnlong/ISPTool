@@ -89,6 +89,7 @@ public:
         CMD_RESEND_PACKET   = 0x000000FF,
         CMD_ERASE_SPIFLASH  = 0x000000D0,
         CMD_UPDATE_SPIFLASH = 0x000000D1,
+        CMD_GET_DEVICE_MODE = 0x000000C9,
     };
 
     // For Code size consideration, CAN only implements some basic isp commands.
@@ -106,6 +107,7 @@ public:
     void SyncPackno();
     unsigned char GetVersion();
     unsigned long GetDeviceID();
+    unsigned char GetDeviceRunMode();
     void ReadConfig(unsigned int config[]);
     void UpdateConfig(unsigned int config[], unsigned int response[]);
     void UpdateAPROM(unsigned long start_addr,
